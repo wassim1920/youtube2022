@@ -1,15 +1,43 @@
 import "./new.scss";
-import Sidebar from "../../components/sidebar/Sidebar";
-import Navbar from "../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import { useState } from "react";
+import axios from "axios";
+import Sidebar from "../../components/sidebar/Sidebar";
+import Navbar from "../../components/navbar/Navbar";
+
 
 const New = ({ inputs, title }) => {
   const [file, setFile] = useState("");
+  const [info, setInfo] = useState({});
+  const handelChange = (e)=>{
+   setInfo((prev)=>({...prev,[e.target.id]: e.target.value }));
+  }
+
+  const handelClick = async e=>{
+    e.preventDefault()
+    const data = new FormData()
+    data.append("file",file)
+    data.append("upload_preset","upload")
+    try{
+         const uploadRes = await axios.post("https://api.cloudinary.com/v1_1/dhb7jpopr/image/upload", data);
+         const {public_id, url} = uploadRes.data
+         const newUser = {
+          ...info , 
+          img : url , public_id, 
+         } 
+         console.log(newUser)
+         const res = await axios.post("/auth/registre" , newUser); 
+         console.log(res)
+         
+        
+    }catch(err){
+         console.log(err)
+    }
+   } 
 
   return (
     <div className="new">
-      <Sidebar />
+      <Sidebar/>
       <div className="newContainer">
         <Navbar />
         <div className="top">
@@ -43,10 +71,14 @@ const New = ({ inputs, title }) => {
               {inputs.map((input) => (
                 <div className="formInput" key={input.id}>
                   <label>{input.label}</label>
-                  <input type={input.type} placeholder={input.placeholder} />
+                  <input type={input.type}
+                  onChange={handelChange}
+                   placeholder={input.placeholder}
+                   id={input.id}
+                  />
                 </div>
               ))}
-              <button>Send</button>
+              <button onClick={handelClick}>Send</button>
             </form>
           </div>
         </div>

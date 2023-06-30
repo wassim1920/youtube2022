@@ -1,23 +1,51 @@
+import React, { useEffect, useState } from "react";
 import "./widget.scss";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
+import BedOutlinedIcon from '@mui/icons-material/BedOutlined';
+import AssuredWorkloadOutlinedIcon from '@mui/icons-material/AssuredWorkloadOutlined';
+import { Link } from "react-router-dom";
+
 
 const Widget = ({ type }) => {
-  let data;
+  const [count, setCount] = useState(0);
 
-  //temporary
-  const amount = 100;
-  const diff = 20;
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      let endpoint = "";
+      switch (type) {
+        case "user":
+          endpoint = "/users/count";
+          break;
+        case "hotel":
+          endpoint = "/hotels/count";
+          break;
+        case "room":
+          endpoint = "/rooms/count";
+          break;
+        default:
+          break;
+      }
+
+      const response = await fetch(endpoint);
+      const data = await response.json();
+      setCount(data.count);
+    } catch (error) {
+      console.error("Error fetching count:", error);
+    }
+  };
+
+  let data = {};
 
   switch (type) {
     case "user":
       data = {
         title: "USERS",
         isMoney: false,
-        link: "See all users",
+        link: <Link to={"/users"}>See all users</Link> ,
         icon: (
           <PersonOutlinedIcon
             className="icon"
@@ -29,13 +57,14 @@ const Widget = ({ type }) => {
         ),
       };
       break;
-    case "order":
+    case "hotel":
+      
       data = {
-        title: "ORDERS",
+        title: "HOTELS",
         isMoney: false,
-        link: "View all orders",
+        link: <Link to={"/hotels"}>View all hotels</Link>,
         icon: (
-          <ShoppingCartOutlinedIcon
+          <AssuredWorkloadOutlinedIcon
             className="icon"
             style={{
               backgroundColor: "rgba(218, 165, 32, 0.2)",
@@ -45,31 +74,15 @@ const Widget = ({ type }) => {
         ),
       };
       break;
-    case "earning":
+    case "room":
       data = {
-        title: "EARNINGS",
-        isMoney: true,
-        link: "View net earnings",
+        title: "ROOMS",
+        isMoney: false,
+        link: <Link to={"/rooms"}>View all rooms</Link>,
         icon: (
-          <MonetizationOnOutlinedIcon
+          <BedOutlinedIcon
             className="icon"
             style={{ backgroundColor: "rgba(0, 128, 0, 0.2)", color: "green" }}
-          />
-        ),
-      };
-      break;
-    case "balance":
-      data = {
-        title: "BALANCE",
-        isMoney: true,
-        link: "See details",
-        icon: (
-          <AccountBalanceWalletOutlinedIcon
-            className="icon"
-            style={{
-              backgroundColor: "rgba(128, 0, 128, 0.2)",
-              color: "purple",
-            }}
           />
         ),
       };
@@ -82,16 +95,10 @@ const Widget = ({ type }) => {
     <div className="widget">
       <div className="left">
         <span className="title">{data.title}</span>
-        <span className="counter">
-          {data.isMoney && "$"} {amount}
-        </span>
+        <span className="counter">{count}</span>
         <span className="link">{data.link}</span>
       </div>
       <div className="right">
-        <div className="percentage positive">
-          <KeyboardArrowUpIcon />
-          {diff} %
-        </div>
         {data.icon}
       </div>
     </div>
